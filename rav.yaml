@@ -1,0 +1,31 @@
+scripts:
+  runserver: uvicorn src.main:app --reload
+  installs: venv/bin/python -m pip install -r requirements.txt
+  test: pytest src/tests.py
+  #build: docker build
+  build: docker build -f Dockerfile -t serverless-py .
+  empty-build: docker build -f Dockerfile.empty -t empty-py .
+  # empty-shell : docker exec -it <running_instance_name> /bin/bash
+  empty-shell : docker exec -it empty_py /bin/bash
+  #empty-run: docker build
+  # empty-run : docker run -p 1234:8000 -it empty-py
+  empty-run : docker run -p 8001:8000 --rm --name empty_py -it empty-py
+  # run-env-inline : docker run -e MODE=stage  -p 8000:8000 --rm --name serverless-py -it serverless-py
+  container_stage : docker run -e MODE=stage  -p 8000:8000 --rm --name serverless-py -it serverless-py
+  container_prod : docker run  -e PORT=8001 --env-file .env-prd -e MODE=PROD  -p 8000:8001 --rm --name serverless-py -it serverless-py
+  run : docker run --env-file .env-prd -p 8000:8000 --rm --name serverless-py -it serverless-py
+  build_run:
+    - rav run build
+    - rav run run
+
+  configure:
+    - gcloud auth configure-docker us-central1-docker.pkg.dev
+    - gcloud artifacts repositories create serverless-py-repo --repository-format=docker --location=us-central1
+  push: 
+    - docker build --platform=linux/amd64 -f Dockerfile -t serverless-py-amd64 .
+    - docker tag serverless-py-amd64 us-central1-docker.pkg.dev/serverless-cfe-408117/serverless-py-repo/serverless-py:latest
+    - docker tag serverless-py-amd64 us-central1-docker.pkg.dev/serverless-cfe-408117/serverless-py-repo/serverless-py:v1
+    - docker push us-central1-docker.pkg.dev/serverless-cfe-408117/serverless-py-repo/serverless-py --all-tags
+  
+  deploy:
+    - gcloud run deploy serverless-py-run --image=us-central1-docker.pkg.dev/serverless-cfe-408117/serverless-py-repo/serverless-py:latest --allow-unauthenticated --region=us-central1 --project=serverless-cfe-408117

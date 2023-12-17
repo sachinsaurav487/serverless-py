@@ -1,0 +1,10 @@
+# which version of python 
+ FROM python:3.8.16-slim     
+#  above is docker python image from hub.docker.com
+
+COPY . /app
+WORKDIR /app
+
+
+# run the app
+CMD ["python","-m","http.server"]
