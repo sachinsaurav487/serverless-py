@@ -23,7 +23,7 @@ jobs:
           python-version: "3.8"
       - name: Install requirements
         run: |
-          python -m pip install -r src\requirements.txt
+          python -m pip install -r src/requirements.txt
       - name: Run tests
         env:
           MODE: "github actions"
