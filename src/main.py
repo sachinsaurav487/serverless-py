@@ -1,6 +1,6 @@
 import os
 from fastapi import FastAPI
-from env import config
+from src.env import config
 
 # MODE=os.environ.get("MODE") or "abc"
 MODE=config("MODE", cast=str,default="testing")
